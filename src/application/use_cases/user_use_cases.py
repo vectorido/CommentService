@@ -1,4 +1,7 @@
-from typing import List, Optional
+import asyncio
+from datetime import datetime
+from uuid import uuid4
+from typing import List, Dict, Optional
 
 from src.domain.entities.user import User
 from src.domain.exceptions import EntityAlreadyExists, EntityNotFound, ValidationError
@@ -68,4 +71,5 @@ class DeleteUserUseCase:
         if not result:
             raise EntityNotFound(f"User with id {user_id} not found")
         return result
+
 

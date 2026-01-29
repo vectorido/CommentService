@@ -6,9 +6,9 @@ class Settings(BaseSettings):
     
     database_host: str = "localhost"
     database_port: int = 5432
-    database_name: str = "cleanarch_db"
+    database_name: str = "postgres"
     database_user: str = "postgres"
-    database_password: str = "postgres"
+    database_password: str = "1234"
     app_host: str = "0.0.0.0"
     app_port: int = 8000
     debug: bool = False
