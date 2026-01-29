@@ -1,0 +1,114 @@
+### Python Clean Architecture API
+### Используй REST Client extension для VS Code
+### https://marketplace.visualstudio.com/items?itemName=humao.rest-client
+
+@host = http://localhost:8000
+@contentType = application/json
+
+###
+
+### Health Check
+GET {{host}}/health
+
+###
+
+### Создать пользователя
+POST {{host}}/users/
+Content-Type: {{contentType}}
+
+{
+  "email": "john.doe@example.com",
+  "name": "John Doe"
+}
+
+###
+
+### Создать ещё пользователей
+POST {{host}}/users/
+Content-Type: {{contentType}}
+
+{
+  "email": "jane.smith@example.com",
+  "name": "Jane Smith"
+}
+
+###
+
+### Получить пользователя по ID
+GET {{host}}/users/1
+
+###
+
+### Получить всех пользователей
+GET {{host}}/users/
+
+###
+
+### Получить пользователей с пагинацией
+GET {{host}}/users/?limit=10&offset=0
+
+###
+
+### Обновить пользователя
+PUT {{host}}/users/1
+Content-Type: {{contentType}}
+
+{
+  "name": "John Updated Doe"
+}
+
+###
+
+### Обновить email
+PUT {{host}}/users/1
+Content-Type: {{contentType}}
+
+{
+  "email": "john.updated@example.com"
+}
+
+###
+
+### Обновить и имя и email
+PUT {{host}}/users/1
+Content-Type: {{contentType}}
+
+{
+  "email": "john.final@example.com",
+  "name": "John Final"
+}
+
+###
+
+### Удалить пользователя
+DELETE {{host}}/users/1
+
+###
+
+### Попытка получить несуществующего пользователя (404)
+GET {{host}}/users/999
+
+###
+
+### Попытка создать пользователя с дубликатом email (409)
+POST {{host}}/users/
+Content-Type: {{contentType}}
+
+{
+  "email": "jane.smith@example.com",
+  "name": "Another Jane"
+}
+
+###
+
+### Невалидный email (422)
+POST {{host}}/users/
+Content-Type: {{contentType}}
+
+{
+  "email": "not-an-email",
+  "name": "Test User"
+}
+
+###
+
