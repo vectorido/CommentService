@@ -9,24 +9,24 @@ class PostgresCommentRepository:
     def __init__(self, pool: Pool):
         self.pool = pool
 
-    async def create(self, comment: Dict) -> Dict:
+    async def create(self, comment: Comment) -> Comment:
         query = """
         INSERT INTO comments (id, entity_type, entity_id, author_id, text, created_at, updated_at)
         VALUES ($1, $2, $3, $4, $5, $6, $7)
-        RETURNING *
+        RETURNING id, entity_type, entity_id, author_id, text, created_at, updated_at
         """
         async with self.pool.acquire() as conn:
             row = await conn.fetchrow(
                 query,
-                comment["id"],
-                comment["entity_type"],
-                comment["entity_id"],
-                comment["author_id"],
-                comment["text"],
-                comment["created_at"],
-                comment["updated_at"],
+                comment.id,
+                comment.entity_type,
+                comment.entity_id,
+                comment.author_id,
+                comment.text,
+                comment.created_at,
+                comment.updated_at,
             )
-        return dict(row)
+        return self._map_row_to_comment(row)
 
     async def get_by_id(self, comment_id: str) -> Optional[Comment]:
         query = """

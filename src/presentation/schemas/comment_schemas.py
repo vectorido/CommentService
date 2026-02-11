@@ -1,3 +1,6 @@
+from datetime import datetime
+from uuid import UUID
+
 from pydantic import BaseModel
 
 class CommentCreateSchema(BaseModel):
@@ -15,11 +18,11 @@ class CommentUpdateSchema(BaseModel):
 
 
 class CommentOutSchema(BaseModel):
-    id: str
+    id: UUID
     entity_type: str
     entity_id: str
     author_id: str
     text: str
-    created_at: str
-    updated_at: str
+    created_at: datetime
+    updated_at: datetime
 

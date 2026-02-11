@@ -20,7 +20,7 @@ from src.infrastructure.repositories.postgres_comment_repository import Postgres
 # ---------- USERS ----------
 
 def get_user_repository():
-    return PostgresUserRepository(db_connection)
+    return PostgresUserRepository(db_connection.pool)
 
 
 def get_create_user_use_case():
@@ -46,7 +46,7 @@ def get_delete_user_use_case():
 # ---------- COMMENTS ----------
 
 def get_comment_repository():
-    return PostgresCommentRepository(db_connection)
+    return PostgresCommentRepository(db_connection.pool)
 
 
 def get_create_comment_use_case():
