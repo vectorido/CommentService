@@ -1,3 +1,5 @@
+from fastapi import Depends
+
 from src.application.use_cases.user_use_cases import (
     CreateUserUseCase,
     GetUserUseCase,
@@ -15,6 +17,13 @@ from src.application.use_cases.comment_use_cases import (
 from src.infrastructure.database.connection import db_connection
 from src.infrastructure.repositories.postgres_user_repository import PostgresUserRepository
 from src.infrastructure.repositories.postgres_comment_repository import PostgresCommentRepository
+from src.infrastructure.messaging.kafka_producer import KafkaEventProducer
+
+
+# ---------- KAFKA ----------
+
+def get_event_producer() -> KafkaEventProducer:
+    return KafkaEventProducer(bootstrap_servers="localhost:9092")
 
 
 # ---------- USERS ----------
@@ -49,13 +58,19 @@ def get_comment_repository():
     return PostgresCommentRepository(db_connection.pool)
 
 
-def get_create_comment_use_case():
-    return CreateCommentUseCase(get_comment_repository())
+def get_create_comment_use_case(
+        repo=Depends(get_comment_repository),
+        producer=Depends(get_event_producer),
+):
+    return CreateCommentUseCase(repo, producer)
 
 
 def get_get_comments_use_case():
     return GetCommentsUseCase(get_comment_repository())
 
 
-def get_update_comment_use_case():
-    return UpdateCommentUseCase(get_comment_repository())
+def get_update_comment_use_case(
+    repo = Depends(get_comment_repository),
+    producer = Depends(get_event_producer),
+):
+    return UpdateCommentUseCase(repo, producer)

@@ -5,6 +5,7 @@ from typing import List
 
 from src.domain.entities.comment import Comment
 from src.domain.exceptions import EntityNotFound, CommentNotFound, CommentValidationError
+from src.infrastructure.messaging.kafka_producer import KafkaEventProducer
 from src.infrastructure.repositories.postgres_comment_repository import PostgresCommentRepository
 
 # Настройка логирования
@@ -13,8 +14,9 @@ logging.basicConfig(level=logging.INFO)
 
 
 class CreateCommentUseCase:
-    def __init__(self, repo: PostgresCommentRepository):
+    def __init__(self, repo: PostgresCommentRepository, producer: KafkaEventProducer):
         self.repo = repo
+        self.producer = producer
 
     async def execute(self, entity_type: str, entity_id: str, author_id: str, text: str) -> Comment:
         """
@@ -35,6 +37,27 @@ class CreateCommentUseCase:
         )
 
         saved_comment = await self.repo.create(comment)
+
+        event = {
+            "event_name": "comment.changed",
+            "action": "created",
+            "comment": {
+                "id": str(saved_comment.id),
+                "entity_type": saved_comment.entity_type,
+                "entity_id": saved_comment.entity_id,
+                "author_id": saved_comment.author_id,
+                "text": saved_comment.text,
+                "created_at": saved_comment.created_at.isoformat() if saved_comment.created_at else None,
+                "updated_at": saved_comment.updated_at.isoformat() if saved_comment.updated_at else None,
+            },
+            "published_at": datetime.utcnow().isoformat(),
+        }
+
+        self.producer.publish(
+            topic="comment.changed",
+            key=str(saved_comment.id),
+            event=event,
+        )
 
         # Логирование
         logger.info(
@@ -72,8 +95,9 @@ class GetCommentsUseCase:
 
 
 class UpdateCommentUseCase:
-    def __init__(self, repo: PostgresCommentRepository):
+    def __init__(self, repo: PostgresCommentRepository, producer: KafkaEventProducer):
         self.repo = repo
+        self.producer = producer
 
     async def execute(
             self,
@@ -96,6 +120,27 @@ class UpdateCommentUseCase:
         comment.update_text(new_text)
 
         updated_comment = await self.repo.update(comment)
+
+        event = {
+            "event_name": "comment.changed",
+            "action": "updated",
+            "comment": {
+                "id": str(updated_comment.id),
+                "entity_type": updated_comment.entity_type,
+                "entity_id": updated_comment.entity_id,
+                "author_id": updated_comment.author_id,
+                "text": updated_comment.text,
+                "created_at": updated_comment.created_at.isoformat() if updated_comment.created_at else None,
+                "updated_at": updated_comment.updated_at.isoformat() if updated_comment.updated_at else None,
+            },
+            "published_at": datetime.utcnow().isoformat(),
+        }
+
+        self.producer.publish(
+            topic="comment.changed",
+            key=str(updated_comment.id),
+            event=event,
+        )
 
         # Логирование
         logger.info(

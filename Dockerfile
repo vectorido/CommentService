@@ -13,7 +13,11 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 ENV UV_SYSTEM_PYTHON=1
 ENV PYTHONUNBUFFERED=1
 
-COPY pyproject.toml .
+WORKDIR /app
+
+COPY pyproject.toml README.md ./
+COPY src ./src
+
 RUN uv pip install -e .
 
 COPY . .
